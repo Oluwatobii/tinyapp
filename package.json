@@ -16,5 +16,8 @@
     "url": "https://github.com/Oluwatobii/tinyapp/issues"
   },
   "homepage": "https://github.com/Oluwatobii/tinyapp#readme",
-  "description": ""
+  "description": "",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
