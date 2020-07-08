@@ -1,20 +1,25 @@
+//Creating The Web Server with Express
 const express = require("express");
-const cookieParser = require("cookie-parser");
 const app = express();
-
 const PORT = 8080; // default port 8080
 
-app.set("view engine", "ejs");
+const cookieParser = require("cookie-parser");
 
-function generateRandomString() {
-  let result = Math.random().toString(36).substring(2, 8);
-  return result;
-}
+app.set("view engine", "ejs");
 
 const urlDatabase = {
   b2xVn2: "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com",
 };
+
+app.get("/", (req, res) => {
+  res.send("Hello!");
+});
+
+function generateRandomString() {
+  let result = Math.random().toString(36).substring(2, 8);
+  return result;
+}
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,10 +60,6 @@ app.post("/logout", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   res.redirect(urlDatabase[req.params.shortURL]);
-});
-
-app.get("/", (req, res) => {
-  res.send("Hello!");
 });
 
 app.get("/urls.json", (req, res) => {
