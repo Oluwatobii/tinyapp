@@ -65,7 +65,7 @@ const authenticateUser = (email, password) => {
   const user = findTheUserByEmail(email);
 
   // check the email and passord match
-  if (user && user.password === password) {
+  if (user.email === email && user.password === password) {
     return user.id;
   } else {
     return false;
@@ -91,13 +91,27 @@ app.post("/urls/:shortURL/update", (req, res) => {
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
+app.get("/login", (req, res) => {
+  const templateVars = { email: "" };
+
+  res.render("urls_login", templateVars);
+});
+
 app.post("/login", (req, res) => {
-  let credentials = req.body.username;
+  // Extract the user info from the request body
+  const { email, password } = req.body;
 
-  res.cookie("user_id", credentials);
-  //console.log("You're here");
+  // Authenticating the user
+  const userId = authenticateUser(email, password);
 
-  res.redirect(`/urls`);
+  if (userId) {
+    // set the user id in the cookie
+    res.cookie("user_id", userId);
+    // res.redirect /urls
+    res.redirect("/urls");
+  } else {
+    res.status(403).send("Error!");
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -107,7 +121,7 @@ app.post("/logout", (req, res) => {
 
 app.get("/urls", (req, res) => {
   if (!req.cookies.user_id) {
-    res.redirect("/register");
+    res.redirect("/login");
   } else {
     const templateVars = {
       urls: urlDatabase,
@@ -130,10 +144,15 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  const templateVars = {
-    email: users[req.cookies.user_id].email,
-  };
-  res.render("urls_new", templateVars);
+  if (!req.cookies.user_id) {
+    res.redirect("/login");
+  } else {
+    const templateVars = {
+      urls: urlDatabase,
+      email: users[req.cookies.user_id].email,
+    };
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.get("/register", (req, res) => {

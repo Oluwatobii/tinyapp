@@ -24,14 +24,11 @@
       <button class="btn btn-outline-Dark">Logout</button>
     </form>
     <% } else { %>
-    <form class="form-inline" action="/login" method="POST">
-      <input
-        class="form-control"
-        type="text"
-        name="username"
-        placeholder="username"
-      />
+    <form class="form-inline" action="/login" method="GET">
       <button type="submit" class="btn btn-outline-Dark">Login</button>
+    </form>
+    <form class="form-inline" action="/register" method="GET">
+      <button type="submit" class="btn btn-outline-Dark">Register</button>
     </form>
     <% } %>
   </nav>
