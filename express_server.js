@@ -117,11 +117,13 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   // Authenticating the user
-  const userId = authenticateUser(email, password);
+  const user = authenticateUser(email, password);
+  // console.log(userId);
+  // console.log(users);
 
-  if (userId) {
+  if (user) {
     // set the user id in the cookie
-    res.cookie("user_id", userId);
+    res.cookie("user_id", user.id);
     // res.redirect /urls
     res.redirect("/urls");
   } else {
@@ -159,7 +161,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!req.cookies.user_id) {
+  if (!users[req.cookies.user_id]) {
     res.redirect("/login");
   } else {
     const templateVars = {
