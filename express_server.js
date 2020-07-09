@@ -1,4 +1,5 @@
 //Creating The Web Server with Express
+
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
@@ -19,6 +20,18 @@ app.use(
   })
 );
 
+//Functions required
+
+const {
+  generateRandomString,
+  urlsForUser,
+  findTheUserByEmail,
+  addNewUser,
+  authenticateUser,
+} = require("./helpers");
+
+//Constants(varibles) required
+
 const users = {
   userRandomID: {
     id: "userRandomID",
@@ -37,60 +50,11 @@ const urlDatabase = {
   "9sm5xK": { longURL: "http://www.google.com", userId: "user2RandomID" },
 };
 
+//Creating Routes
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
-
-const urlsForUser = (urlDatabase, userId) => {
-  let newUserUrlDatabase = {};
-  const urlDatabaseValues = Object.entries(urlDatabase);
-  for (id of urlDatabaseValues) {
-    if (id[1].userId === userId) {
-      newUserUrlDatabase[id[0]] = id[1];
-    }
-  }
-  return newUserUrlDatabase;
-};
-
-const generateRandomString = () => {
-  let result = Math.random().toString(36).substring(2, 8);
-  return result;
-};
-
-const addNewUser = (email, password) => {
-  // generate an id
-  const userId = generateRandomString();
-  // create a new user object
-  const newUser = {
-    id: userId,
-    email,
-    password: bcrypt.hashSync(password, saltRounds),
-  };
-  users[userId] = newUser;
-
-  return userId;
-};
-
-const findTheUserByEmail = (email) => {
-  for (let userId in users) {
-    if (users[userId].email === email) {
-      return users[userId];
-    }
-  }
-  return false;
-};
-
-const authenticateUser = (email, password) => {
-  // Does the user with that email exist?
-  const user = findTheUserByEmail(email);
-
-  // check the email and passord match
-  if (user.email === email && bcrypt.compareSync(password, user.password)) {
-    return user;
-  } else {
-    return false;
-  }
-};
 
 app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
@@ -126,14 +90,14 @@ app.post("/login", (req, res) => {
   const { email, password } = req.body;
 
   // Authenticating the user
-  const user = authenticateUser(email, password);
+  const user = authenticateUser(users, email, password);
 
   if (user) {
     // set the user id in the cookie
     req.session.user_id = user.id;
     res.redirect("/urls");
   } else {
-    res.status(403).send("Error!");
+    res.status(403).send("Error!! - Wrong Credentials");
   }
 });
 
@@ -163,9 +127,9 @@ app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
+});
 
 app.get("/urls/new", (req, res) => {
   if (!users[req.session.user_id]) {
@@ -200,7 +164,7 @@ app.post("/register", (req, res) => {
   if (userExistInDb) {
     res.status(400).send("Error: email already exists");
   } else {
-    const userId = addNewUser(email, password);
+    const userId = addNewUser(users, email, password);
 
     req.session.user_id = userId;
     res.redirect("/urls");
