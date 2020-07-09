@@ -5,6 +5,8 @@ const PORT = 8080; // default port 8080
 
 const cookieParser = require("cookie-parser");
 const bodyParser = require("body-parser");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,12 +16,12 @@ const users = {
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: bcrypt.hashSync("purple-monkey-dinosaur", saltRounds),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk", saltRounds),
   },
 };
 
@@ -55,7 +57,7 @@ const addNewUser = (email, password) => {
   const newUser = {
     id: userId,
     email,
-    password,
+    password: bcrypt.hashSync(password, saltRounds),
   };
   users[userId] = newUser;
 
@@ -76,7 +78,7 @@ const authenticateUser = (email, password) => {
   const user = findTheUserByEmail(email);
 
   // check the email and passord match
-  if (user.email === email && user.password === password) {
+  if (user.email === email && bcrypt.compareSync(password, user.password)) {
     return user;
   } else {
     return false;
@@ -123,7 +125,7 @@ app.post("/login", (req, res) => {
   // Authenticating the user
   const user = authenticateUser(email, password);
   // console.log(userId);
-  // console.log(users);
+  console.log(users);
 
   if (user) {
     // set the user id in the cookie
