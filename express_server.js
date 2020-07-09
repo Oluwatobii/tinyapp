@@ -24,18 +24,29 @@ const users = {
 };
 
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b2xVn2: { longURL: "http://www.lighthouselabs.ca", userId: "userRandomID" },
+  "9sm5xK": { longURL: "http://www.google.com", userId: "user2RandomID" },
 };
 
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-function generateRandomString() {
+const urlDatabaseForUsers = (urlDatabase, userId) => {
+  let newUserUrlDatabase = {};
+  const urlDatabaseValues = Object.entries(urlDatabase);
+  for (id of urlDatabaseValues) {
+    if (id[1].userId === userId) {
+      newUserUrlDatabase[id[0]] = id[1];
+    }
+  }
+  return newUserUrlDatabase;
+};
+
+const generateRandomString = () => {
   let result = Math.random().toString(36).substring(2, 8);
   return result;
-}
+};
 
 const addNewUser = (email, password) => {
   // generate an id
@@ -66,28 +77,32 @@ const authenticateUser = (email, password) => {
 
   // check the email and passord match
   if (user.email === email && user.password === password) {
-    return user.id;
+    return user;
   } else {
     return false;
   }
 };
 
 app.post("/urls", (req, res) => {
+  console.log(req.body);
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
-  urlDatabase[newShortURL] = newLongURL;
+  //urlDatabase[newShortURL] = newLongURL;
+  const userID = req.cookies.user_id;
+  urlDatabase[newShortURL] = { longURL: newLongURL, userId: userID };
+  console.log(urlDatabase);
   res.redirect(`/urls/${newShortURL}`);
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
   delete urlDatabase[req.params.shortURL];
-  console.log(urlDatabase);
+  //console.log(urlDatabase);
   res.redirect(`/urls`);
 });
 
 app.post("/urls/:shortURL/update", (req, res) => {
   let newLongURL = req.body.longURL;
-  urlDatabase[req.params.shortURL] = newLongURL;
+  urlDatabase[req.params.shortURL].longURL = newLongURL;
   res.redirect(`/urls/${req.params.shortURL}`);
 });
 
@@ -120,8 +135,8 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  if (!req.cookies.user_id) {
-    res.redirect("/login");
+  if (!users[req.cookies.user_id]) {
+    res.redirect("/login"); //<-----should it be render(urls_index)) instead?
   } else {
     const templateVars = {
       urls: urlDatabase,
@@ -132,7 +147,7 @@ app.get("/urls", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]);
+  res.redirect(urlDatabase[req.params.shortURL].longURL);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -183,11 +198,12 @@ app.post("/register", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  console.log(req.cookies);
+  //console.log(req.cookies);
+  console.log(req.params);
   const templateVars = {
     email: users[req.cookies.user_id].email,
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL].longURL,
   };
   res.render("urls_show", templateVars);
 });
