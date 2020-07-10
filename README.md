@@ -5,14 +5,6 @@ This full stack web application is built with Node and Express and allows users 
 ## Final Product
 
 <img src="Images/Screenshot-of-the-ogin-page.png">
-<img src="Images/Screenshot-of-URL-index-before-adding-shortURL.png">
-<img src="Images/Screenshot-of-URL-new.png">
-<img src="Images/Screenshot-of-URL-index-after-adding-shortURL.png">
-
-<!-- !["Screenshot of the login page"](Images/Screenshot-of-the-ogin-page.png)
-!["Screenshot of URL index before adding shortURL"](Images/Screenshot-of-URL-index-before-adding-shortURL.png)
-!["Screenshot of URL new"](Images/Screenshot-of-URL-new.png)
-!["Screenshot of URL index after adding shortURL"](Images/Screenshot-of-URL-index-after-adding-shortURL.png) -->
 
 ## Dependencies
 
