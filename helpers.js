@@ -33,10 +33,7 @@ const addNewUser = (users, email, password) => {
 
 const authenticateUser = (users, email, password) => {
   // Does the user with that email exist?
-  console.log("Thsi is the email", email);
-  console.log("Thsi is the password", password);
   const user = findTheUserByEmail(email, users);
-  console.log("This is the user", user);
 
   // check the email and passord match
   if (user.email === email && bcrypt.compareSync(password, user.password)) {

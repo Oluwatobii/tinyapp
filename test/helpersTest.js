@@ -15,11 +15,19 @@ const testUsers = {
   },
 };
 
-describe("getUserByEmail", function () {
+describe("findTheUserByEmail", function () {
   it("should return a user with valid email", function () {
-    const user = findTheUserByEmail("user@example.com", users);
+    const user = findTheUserByEmail("user@example.com", testUsers);
     const expectedOutput = "userRandomID";
     // Write your assert statement here
-    assert.isTrue();
+    assert.equal(user, testUsers[expectedOutput]);
+  });
+
+  it("should return undefined with an invalid email", function () {
+    const user = findTheUserByEmail("nonuser@test.com", testUsers);
+    console.log("HEre", user);
+    const expectedOutput = false;
+    // Write your assert statement here
+    assert.equal(user, expectedOutput);
   });
 });
