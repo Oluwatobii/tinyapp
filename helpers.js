@@ -4,7 +4,7 @@ const saltRounds = 10;
 const urlsForUser = (urlDatabase, userId) => {
   let newUserUrlDatabase = {};
   const urlDatabaseValues = Object.entries(urlDatabase);
-  for (id of urlDatabaseValues) {
+  for (let id of urlDatabaseValues) {
     if (id[1].userId === userId) {
       newUserUrlDatabase[id[0]] = id[1];
     }
