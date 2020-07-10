@@ -22,4 +22,4 @@ This full stack web application is built with Node and Express and allows users 
 
 - Install all dependencies using `npm install` command.
 - Run the development web server using the `node express_server.js` command. OR...
-- For development purposes ONLY I suggest installing nodemon and starting the server with npm start instead
+- For development purposes ONLY I suggest installing nodemon and starting the server with `npm start` instead
