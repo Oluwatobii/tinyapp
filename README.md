@@ -5,9 +5,9 @@ This full stack web application is built with Node and Express and allows users 
 ## Final Product
 
 <img src="Images/login-page.png">
-<img src="Images/URL-index-before.png">
+<img src="Images/URLindex-b.png">
 <img src="Images/URL-new.png">
-<img src="Images/URL-index-after.png">
+<img src="Images/URLindex-a.png">
 
 ## Dependencies
 
