@@ -4,11 +4,6 @@ This full stack web application is built with Node and Express and allows users 
 
 ## Final Product
 
-<!-- <img src="Images/login-page.png">
-<img src="Images/URLindex-b.png">
-<img src="Images/URL-new.png">
-<img src="Images/URLindex-a.png"> -->
-
 !["login-page""](Images/login-page.png)
 !["URLindex-before"](Images/URLindex-b.png)
 !["URL-new"](Images/URL-new.png)
