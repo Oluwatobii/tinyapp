@@ -2,7 +2,7 @@
 
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 
 const cookieSession = require("cookie-session");
 
@@ -52,10 +52,13 @@ const urlDatabase = {
 
 //Creating Routes
 
+//route to /(homepage)
+//redirects to urls index
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  res.redirect(`/urls`);
 });
 
+//POST method for creating a new URL
 app.post("/urls", (req, res) => {
   const newShortURL = generateRandomString();
   const newLongURL = req.body.longURL;
@@ -64,6 +67,7 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${newShortURL}`);
 });
 
+//POST method for deleting an existing short URL
 app.post("/urls/:shortURL/delete", (req, res) => {
   if (urlDatabase[req.params.shortURL].userId === req.session.user_id) {
     delete urlDatabase[req.params.shortURL];
@@ -71,6 +75,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   }
 });
 
+//POST method for upadting an existing short URL
 app.post("/urls/:shortURL/update", (req, res) => {
   if (urlDatabase[req.params.shortURL].userId === req.session.user_id) {
     let newLongURL = req.body.longURL;
@@ -79,33 +84,57 @@ app.post("/urls/:shortURL/update", (req, res) => {
   }
 });
 
+//GET Login page
 app.get("/login", (req, res) => {
   const templateVars = { email: "" };
 
   res.render("urls_login", templateVars);
 });
 
+//POST method for logging in
 app.post("/login", (req, res) => {
   // Extract the user info from the request body
   const { email, password } = req.body;
 
   // Authenticating the user
-  const user = authenticateUser(users, email, password);
+  const user = findTheUserByEmail(email, users);
+
+  let userID = req.session.user_id;
+
+  if (email === "" || password === "") {
+    res
+      .status(403)
+      .send(
+        "Invalid email or password, Kindly re-enter in your credientials and try again."
+      );
+  }
 
   if (user) {
-    // set the user id in the cookie
-    req.session.user_id = user.id;
-    res.redirect("/urls");
+    const userCheck = authenticateUser(users, email, password);
+
+    if (userCheck) {
+      req.session.user_id = user.id;
+      res.redirect("/urls");
+    } else {
+      res.status(403).send("Your password is incorrect, please try again.");
+    }
   } else {
-    res.status(403).send("Error!! - Wrong Credentials");
+    res
+      .status(403)
+      .send(
+        "This email adress is not an existing user in our database. Kindly register to use our cool features"
+      );
   }
 });
 
+//POST method for logging out
 app.post("/logout", (req, res) => {
   req.session.user_id = null;
   res.redirect(`/urls`);
 });
 
+//Route for /urls
+//Renders calls urls_index page
 app.get("/urls", (req, res) => {
   if (!users[req.session.user_id]) {
     res.redirect("/login");
@@ -119,18 +148,16 @@ app.get("/urls", (req, res) => {
   }
 });
 
+//GET short url link, redirect to the corresponding long URL
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL].longURL);
+  if (!urlDatabase[req.params.shortURL]) {
+    res.status(400).send("Short Link does not exist");
+  } else {
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
+  }
 });
 
-app.get("/urls.json", (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
+//GET create new URL page
 app.get("/urls/new", (req, res) => {
   if (!users[req.session.user_id]) {
     res.redirect("/login");
@@ -147,40 +174,64 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
+//GET Registration page
 app.get("/register", (req, res) => {
   const templateVars = { email: "" };
 
   res.render("urls_registration", templateVars);
 });
 
+//POST method for registering a new user
 app.post("/register", (req, res) => {
   const { email, password } = req.body;
+  const userExistInDb = findTheUserByEmail(email, users);
+
   if (email === "" || password === "") {
-    res.status(400).send("Email & Password needs to be filled out!");
+    res
+      .status(400)
+      .send(
+        "Email & Password needs to be filled out, please fill in these fields and try again."
+      );
   }
 
-  const userExistInDb = findTheUserByEmail(email);
-
   if (userExistInDb) {
-    res.status(400).send("Error: email already exists");
+    res
+      .status(400)
+      .send(
+        "A user with this email already exists, please register with a different email"
+      );
   } else {
     const userId = addNewUser(users, email, password);
-
     req.session.user_id = userId;
     res.redirect("/urls");
   }
 });
 
+//GET page for specific short URL
 app.get("/urls/:shortURL", (req, res) => {
   const newDatabase = urlsForUser(urlDatabase, req.session.user_id);
-  const templateVars = {
-    email: users[req.session.user_id].email,
-    shortURL: req.params.shortURL,
-    longURL: newDatabase[req.params.shortURL].longURL,
-  };
-  res.render("urls_show", templateVars);
+
+  const shortURL = newDatabase[req.params.shortURL];
+
+  if (!req.session.user_id) {
+    res.status(403);
+    res.send("Unauthorized!: You don't have permission to access this page");
+  } else if (req.session.user_id && !shortURL) {
+    res.status(403);
+    res.send("Unauthorized!: You do not own this URL");
+  } else {
+    let user = users[req.session.user_id];
+    const templateVars = {
+      email: users[req.session.user_id].email,
+      shortURL: req.params.shortURL,
+      longURL: newDatabase[req.params.shortURL].longURL,
+      user: user,
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
+//Launch server
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
